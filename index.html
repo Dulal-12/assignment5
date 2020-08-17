@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Hard Rock Solution - Song Lyric App</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- Custom css -->
+    <link rel="stylesheet" href="style.css">
+    <!-- google font -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- navbar section -->
+    <div class="container">
+        <nav class="navbar  navbar-dark my-3">
+            <a class="navbar-brand" href="#">
+                <img src="images/logo.png" alt="Hard Rock Solution">
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavId" aria-controls="collapsibleNavId" aria-expanded="false" aria-label="Toggle navigation">
+                <img src="images/toggler-icon.svg" alt="">
+            </button>
+            <div class="collapse navbar-collapse" id="collapsibleNavId">
+                <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+                        <div class="dropdown-menu" aria-labelledby="dropdownId">
+                            <a class="dropdown-item" href="#">Action 1</a>
+                            <a class="dropdown-item" href="#">Action 2</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+  <!-- main searching type -->
+        <main class="content-area">
+            <div class="search-bar col-md-6 mx-auto">
+                <h1 class="text-center" id="topContain">Lyrics Search</h1>
+                <div class="search-box my-5">
+                    <input  id="songName"type="text" class="form-control" placeholder="Enter your artist song name">
+                    <button onclick="searchGenerator()" class="btn btn-success search-btn" >Search</button>
+                </div>
+            </div>
+
+
+            <!-- song result section -->
+            <div class="search-result col-md-8 mx-auto py-4" id="songDisplay"  > 
+            </div>
+
+         </main>
+         </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <!-- Custom Script Here -->
+    <script>
+        // At first using DOM connect song-list and got apiurl
+        const song = document.getElementById("songDisplay");
+
+        //Then create a function for song generate, which is coming from api
+        function searchGenerator(){
+            let song = document.getElementById('songName').value;
+            fetch(`https://api.lyrics.ovh/suggest/`+`${song}`)
+            .then(response=>response.json())
+            .then(data=>display(data))
+          }
+        //This function for showing details like(song title and artist name)
+        function display(data){
+            if(data.data.length == 0){
+                alert("Don't find this song");
+            }
+            else{
+                    song.innerHTML = `${data.data.slice(0,10).map(song=> 
+                   `<div class="single-result row align-items-center my-3 p-3">
+                    <div class="col-md-9">
+                             <h3 class="lyrics-name">${song.title}</h3>
+                             <p id="para" class="author lead">Album by <span>${song.artist.name} </span></p>
+                    </div>
+
+                    <div class="col-md-3 text-md-right text-center">
+                        <button  data-name="${song.artist.name}" data-songTitle="${song.title}" class="btn btn-success" >Get Lyrics</button>
+                    </div>
+                    </div>`)
+                        .join('')}  `;
+                       } }
+
+                //This two section for song lyrics using artist and title
+                //But when we got nothing .we show "NOT FOUND MESSAGE"
+                  song.addEventListener('click', e=>{
+                  const clickedElement = e.target;
+                    if (clickedElement.tagName === 'BUTTON'){
+                        const artist = clickedElement.getAttribute('data-name');
+                        const songTitle = clickedElement.getAttribute('data-songTitle');
+                        getSongLyrics(artist, songTitle)
+                    }
+                })
+                async function getSongLyrics(artist, songTitle) {
+                    fetch(`https://api.lyrics.ovh/v1/${artist}/${songTitle}`)
+                    .then(res => res.json())
+                    .then(data => lyricsGenerator(data))
+                    .catch(error => alert("NOT FOUND"))
+
+                    function lyricsGenerator(data){
+                    const lyrics = data.lyrics.replace(new RegExp("\n",'g'),"<br>");
+                    song.innerHTML = `<h2><strong>${artist}</strong> Song - ${songTitle}</h2>
+                    <p id ="songLyrics1">${lyrics}</p>`;
+                     } 
+                }
+
+    </script>
+</body>
+</html>
